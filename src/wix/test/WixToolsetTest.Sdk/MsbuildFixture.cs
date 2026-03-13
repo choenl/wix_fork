@@ -703,8 +703,8 @@ namespace WixToolsetTest.Sdk
                 {
                     @"net472_x64\e_sqlite3.dll - 1601536",
                     @"net472_x86\e_sqlite3.dll - 1207296",
-                    @"net6_x64\e_sqlite3.dll - 1601536",
-                    @"net6_x86\e_sqlite3.dll - 1207296",
+                    @"net8_x64\e_sqlite3.dll - 1601536",
+                    @"net8_x86\e_sqlite3.dll - 1207296",
                 }, releaseFileSizes);
             }
         }
@@ -741,12 +741,12 @@ namespace WixToolsetTest.Sdk
                 {
                     @"debug_net472_x64\e_sqlite3.dll - 1601536",
                     @"debug_net472_x86\e_sqlite3.dll - 1207296",
-                    @"debug_net6_x64\e_sqlite3.dll - 1601536",
-                    @"debug_net6_x86\e_sqlite3.dll - 1207296",
+                    @"debug_net8_x64\e_sqlite3.dll - 1601536",
+                    @"debug_net8_x86\e_sqlite3.dll - 1207296",
                     @"release_net472_x64\e_sqlite3.dll - 1601536",
                     @"release_net472_x86\e_sqlite3.dll - 1207296",
-                    @"release_net6_x64\e_sqlite3.dll - 1601536",
-                    @"release_net6_x86\e_sqlite3.dll - 1207296",
+                    @"release_net8_x64\e_sqlite3.dll - 1601536",
+                    @"release_net8_x86\e_sqlite3.dll - 1207296",
                 }, releaseFileSizes);
             }
         }
