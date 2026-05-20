@@ -47,7 +47,7 @@
     <Product Condition=" '$(WixOfficialBuild)'=='true' ">WiX Toolset</Product>
     <ProjectUrl>https://wixtoolset.org/</ProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageIconSource Condition=" '$(WixOfficialBuild)'!='true' ">$(MSBuildThisFileDirectory)internal\images\official\icon_VL.png</PackageIconSource>
+    <PackageIconSource Condition=" '$(WixOfficialBuild)'!='true' ">$(MSBuildThisFileDirectory)internal\images\icon.png</PackageIconSource>
     <PackageIconSource Condition=" '$(WixOfficialBuild)'=='true' ">$(MSBuildThisFileDirectory)internal\images\official\icon.png</PackageIconSource>
     <PackageTags>WiX MSI install setup</PackageTags>
   </PropertyGroup>
