@@ -6,7 +6,8 @@
     "WixToolset.Sdk": "6.1.1-build.1"
   },
   "sdk": {
-	"version": "9.0.205",
+	"version": "8.0.0",
     "allowPrerelease": false
+	"rollForward": "latestMinor"
   }
 }
