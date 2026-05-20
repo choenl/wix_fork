@@ -44,6 +44,22 @@ jobs:
           reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\Windows Error Reporting\LocalDumps" /t REG_DWORD /v DumpCount /d 10 /f
           reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\Windows Error Reporting\LocalDumps" /t REG_DWORD /v DumpType /d 1
 
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Remove .NET SDK 10.0 to prevent MSBuild conflicts
+        shell: pwsh
+        run: |
+          # Remove any .NET 10.x SDK that conflicts with MSBuild 17
+          $sdkPath = "C:\Program Files\dotnet\sdk"
+          Get-ChildItem $sdkPath -Directory | Where-Object { $_.Name -like "10.*" } | ForEach-Object {
+            Write-Host "Removing SDK: $($_.FullName)"
+            Remove-Item $_.FullName -Recurse -Force
+          }
+          dotnet --list-sdks
+
       - name: Build wix6
         shell: cmd
         run: ./src/build_official.cmd
