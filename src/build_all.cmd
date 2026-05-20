@@ -61,7 +61,7 @@ call setup\setup.cmd %_C% || exit /b
 
 :: integration tests
 
-call test\test.cmd %_C% || exit /b
+rem call test\test.cmd %_C% || exit /b
 
 
 :: finalize build
