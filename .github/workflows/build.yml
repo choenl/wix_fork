@@ -3,12 +3,12 @@ name: Build WiX Toolset v6
 on:
   push:
     branches:
-      - main
+      - BuildTestv6
     tags:
       - v**
   pull_request:
     branches:
-      - main
+      - BuildTestv6
   workflow_dispatch:
 
 env:
@@ -22,26 +22,15 @@ jobs:
     name: Build
     runs-on: windows-2022
     env:
-      RepoOrg: ${{ github.repository_owner }}
-      SignBuild: ${{ github.repository_owner == 'wixtoolset' && startsWith(github.ref, 'refs/tags/v') }}
-      WixOfficialBuild: ${{ github.repository_owner == 'wixtoolset' && startsWith(github.ref, 'refs/tags/v') }}
+      SignBuild: false
+      WixOfficialBuild: false
     permissions:
       packages: write
-      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      # - name: Configure Visual Studio
-      #   shell: cmd
-      #   run: ./src/vs_config.cmd
-
-      - name: Install sign tool
-        if: ${{ env.SignBuild == 'true' }}
-        shell: cmd
-        run: dotnet tool install --tool-path build\.tools sign --version 0.9.1-beta.24170.3
 
       - name: Configure automated logging and crash dumps
         shell: cmd
@@ -55,30 +44,40 @@ jobs:
           reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\Windows Error Reporting\LocalDumps" /t REG_DWORD /v DumpCount /d 10 /f
           reg add "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\Windows Error Reporting\LocalDumps" /t REG_DWORD /v DumpType /d 1
 
-      # - name: 'Az CLI login'
-      #   if: ${{ env.SignBuild == 'true' }}
-      #   uses: azure/login@v1
-      #   with:
-      #     allow-no-subscriptions: true
-      #     client-id: ${{ secrets.WIX_SIGNING_CLIENTID }}
-      #     tenant-id: ${{ secrets.WIX_SIGNING_TENANTID }}
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+         
+      - name: Remove .NET SDK 10.0 to prevent MSBuild conflicts
+        shell: pwsh
+        run: |
+          # Remove any .NET 10.x SDK that conflicts with MSBuild 17
+          $sdkPath = "C:\Program Files\dotnet\sdk"
+          Get-ChildItem $sdkPath -Directory | Where-Object { $_.Name -like "10.*" } | ForEach-Object {
+            Write-Host "Removing SDK: $($_.FullName)"
+            Remove-Item $_.FullName -Recurse -Force
+          }
+          dotnet --list-sdks
 
       - name: Build wix6
         shell: cmd
         run: ./src/build_official.cmd
         env:
           RuntimeTestsEnabled: true
-          SigningKeyVaultUri:  ${{ env.SignBuild == 'true' && secrets.WIX_SIGNING_VAULTURI || '' }}
-          SigningTenantId:  ${{ env.SignBuild == 'true' && secrets.WIX_SIGNING_TENANTID || '' }}
-          SigningClientId:  ${{ env.SignBuild == 'true' && secrets.WIX_SIGNING_CLIENTID || '' }}
-          SigningClientSecret:  ${{ env.SignBuild == 'true' && secrets.WIX_SIGNING_SECRET || '' }}
-          SigningCertName:  ${{ env.SignBuild == 'true' && secrets.WIX_SIGNING_CERTNAME || '' }}
 
       - name: Validate test results
+        if: ${{ !cancelled() }}
         shell: cmd
-        run: 7z a build\testresults.zip @src\testresultfilelist.txt
+        run: |
+          if exist src\testresultfilelist.txt (
+            7z a build\testresults.zip @src\testresultfilelist.txt
+          ) else (
+            echo No testresultfilelist.txt found, skipping.
+          )
 
       - name: Save build
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: artifacts
@@ -99,14 +98,13 @@ jobs:
         shell: cmd
         run: wevtutil epl System build\logs\System.evtx /q:"Event/System/TimeCreated[timediff(@SystemTime) <= 86400000]"
 
-      # Do NOT publish logs on `official builds` (version tagged builds) as they may contain secrets in them.
       - name: Save logs
-        if: ${{ env.SignBuild != 'true' && !cancelled() }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: logs_${{ github.run_id }}
           path: build/logs/
 
       - name: Push to GitHub Packages
-        if: ${{ github.event_name == 'push' && github.repository_owner == 'wixtoolset' && (env.WixOfficialBuild == 'true' || github.ref == 'refs/heads/main') }}
-        run: dotnet nuget push "build/artifacts/**/*.nupkg" --source https://nuget.pkg.github.com/wixtoolset/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        if: ${{ github.event_name == 'push' }}
+        run: dotnet nuget push "build/artifacts/**/*.nupkg" --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
