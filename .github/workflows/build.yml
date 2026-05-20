@@ -52,28 +52,38 @@ jobs:
       - name: Install .NET prerequisites
         shell: pwsh
         run: |
-          # Download and run the .NET prerequisites installer for Windows
-          $dotnetPrereqUrl = "https://go.microsoft.com/fwlink/?linkid=2135274"
-          $dotnetPrereqPath = "$env:TEMP\windowsdesktop-runtime-prerequisites.exe"
+          # Use dotnet tool to install required prerequisites
+          Write-Host "Installing .NET Desktop Runtime prerequisites..."
           
-          Write-Host "Downloading .NET prerequisites..."
-          Invoke-WebRequest -Uri $dotnetPrereqUrl -OutFile $dotnetPrereqPath
+          # Download from Microsoft's official CDN with specific version
+          $dotnetPrereqUrl = "https://download.microsoft.com/download/0/5/4/05413EB9-EA00-44FA-ABAB-1D43BFCA9D6F/windowsdesktop-runtime-9.0.0-win-x64.exe"
+          $dotnetPrereqPath = "$env:TEMP\windowsdesktop-runtime.exe"
           
-          Write-Host "Installing .NET prerequisites..."
-          & $dotnetPrereqPath /quiet /norestart
-          
-          Remove-Item -Path $dotnetPrereqPath -Force -ErrorAction SilentlyContinue
-      
-      - name: Remove .NET SDK 10.0 to prevent MSBuild conflicts
-        shell: pwsh
-        run: |
-          # Remove any .NET 10.x SDK that conflicts with MSBuild 17
-          $sdkPath = "C:\Program Files\dotnet\sdk"
-          Get-ChildItem $sdkPath -Directory | Where-Object { $_.Name -like "10.*" } | ForEach-Object {
-            Write-Host "Removing SDK: $($_.FullName)"
-            Remove-Item $_.FullName -Recurse -Force
+          try {
+            Write-Host "Downloading .NET prerequisites..."
+            Invoke-WebRequest -Uri $dotnetPrereqUrl -OutFile $dotnetPrereqPath -TimeoutSec 300
+            
+            Write-Host "Installing .NET prerequisites..."
+            & $dotnetPrereqPath /quiet /norestart
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "Installation exit code: $LASTEXITCODE"
+            }
           }
-          dotnet --list-sdks
+          finally {
+            Remove-Item -Path $dotnetPrereqPath -Force -ErrorAction SilentlyContinue
+          }
+            
+            - name: Remove .NET SDK 10.0 to prevent MSBuild conflicts
+              shell: pwsh
+              run: |
+                # Remove any .NET 10.x SDK that conflicts with MSBuild 17
+                $sdkPath = "C:\Program Files\dotnet\sdk"
+                Get-ChildItem $sdkPath -Directory | Where-Object { $_.Name -like "10.*" } | ForEach-Object {
+                  Write-Host "Removing SDK: $($_.FullName)"
+                  Remove-Item $_.FullName -Recurse -Force
+                }
+                dotnet --list-sdks
 
       - name: Build wix6
         shell: cmd
