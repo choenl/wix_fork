@@ -48,6 +48,21 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+
+      - name: Install .NET prerequisites
+        shell: pwsh
+        run: |
+          # Download and run the .NET prerequisites installer for Windows
+          $dotnetPrereqUrl = "https://go.microsoft.com/fwlink/?linkid=2135274"
+          $dotnetPrereqPath = "$env:TEMP\windowsdesktop-runtime-prerequisites.exe"
+          
+          Write-Host "Downloading .NET prerequisites..."
+          Invoke-WebRequest -Uri $dotnetPrereqUrl -OutFile $dotnetPrereqPath
+          
+          Write-Host "Installing .NET prerequisites..."
+          & $dotnetPrereqPath /quiet /norestart
+          
+          Remove-Item -Path $dotnetPrereqPath -Force -ErrorAction SilentlyContinue
       
       - name: Remove .NET SDK 10.0 to prevent MSBuild conflicts
         shell: pwsh
