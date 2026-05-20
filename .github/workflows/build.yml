@@ -24,7 +24,7 @@ jobs:
     env:
       RepoOrg: ${{ github.repository_owner }}
       SignBuild: ${{ startsWith(github.ref, 'refs/tags/v') }}
-      WixOfficialBuild: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      WixOfficialBuild: ${{ github.repository_owner == 'wixtoolset' && startsWith(github.ref, 'refs/tags/v') }}
     permissions:
       packages: write
       id-token: write
