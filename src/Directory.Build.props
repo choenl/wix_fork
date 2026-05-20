@@ -34,9 +34,9 @@
 
   <PropertyGroup>
     <Authors Condition=" '$(WixOfficialBuild)'!='true' ">WiX CHHL Build</Authors>
-    <Authors Condition=" '$(WixOfficialBuild)'=='true' ">WiX Toolset Team</Authors>
+    <Authors Condition=" '$(WixOfficialBuild)'=='true' ">WiX Toolset CHHL</Authors>
     <Company Condition=" '$(WixOfficialBuild)'!='true' ">WiX CHHL Build</Company>
-    <Company Condition=" '$(WixOfficialBuild)'=='true' ">WiX Toolset</Company>
+    <Company Condition=" '$(WixOfficialBuild)'=='true' ">WiX Toolset VL</Company>
     <Copyright>Copyright (c) .NET Foundation and contributors. All rights reserved.</Copyright>
 
     <PackageEulaSource>$(RootFolder)OSMFEULA.txt</PackageEulaSource>
@@ -48,7 +48,7 @@
     <ProjectUrl>https://wixtoolset.org/</ProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconSource Condition=" '$(WixOfficialBuild)'!='true' ">$(MSBuildThisFileDirectory)internal\images\icon.png</PackageIconSource>
-    <PackageIconSource Condition=" '$(WixOfficialBuild)'=='true' ">$(MSBuildThisFileDirectory)internal\images\official\icon.png</PackageIconSource>
+    <PackageIconSource Condition=" '$(WixOfficialBuild)'=='true' ">$(MSBuildThisFileDirectory)internal\images\official\icon_VL.png</PackageIconSource>
     <PackageTags>WiX MSI install setup</PackageTags>
   </PropertyGroup>
 
